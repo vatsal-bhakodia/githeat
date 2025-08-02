@@ -62,86 +62,13 @@ export default function Home() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Create a temporary canvas with higher resolution for download
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    if (!tempCtx) return;
-
-    tempCanvas.width = 1200;
-    tempCanvas.height = 400;
-
-    // Clear with dark background
-    tempCtx.fillStyle = "#0D1117";
-    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-    const text = displayText;
-    const cols = 53;
-    const rows = 7;
-    const dotSize = ((tempCanvas.width - 120) / cols) * 0.85;
-    const gap = dotSize * 0.2;
-    const startX = (tempCanvas.width - (cols * (dotSize + gap) - gap)) / 2;
-    const startY = (tempCanvas.height - (rows * (dotSize + gap) - gap)) / 2;
-
-    // Create and render text pattern
-    const textPattern = createTextPattern(text);
-    const patternWidth = textPattern[0]?.length || 0;
-    const patternHeight = textPattern.length;
-    const offsetX = Math.max(0, Math.floor((cols - patternWidth) / 2));
-    const offsetY = Math.max(0, Math.floor((rows - patternHeight) / 2));
-
-    const colors = ["#161B22", "#0E4429", "#006D32", "#26A641", "#39FF14"];
-
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const x = startX + col * (dotSize + gap);
-        const y = startY + row * (dotSize + gap);
-
-        const patternRow = row - offsetY;
-        const patternCol = col - offsetX;
-
-        let intensity = 0;
-        if (
-          patternRow >= 0 &&
-          patternRow < patternHeight &&
-          patternCol >= 0 &&
-          patternCol < patternWidth &&
-          textPattern[patternRow] &&
-          textPattern[patternRow][patternCol]
-        ) {
-          intensity = textPattern[patternRow][patternCol];
-        }
-
-        if (intensity === 0 && Math.random() < 0.03) {
-          intensity = 0.1;
-        }
-
-        const colorIndex = Math.min(
-          Math.floor(intensity * colors.length),
-          colors.length - 1
-        );
-        tempCtx.fillStyle = colors[colorIndex];
-
-        const radius = dotSize * 0.15;
-        tempCtx.beginPath();
-        tempCtx.roundRect(x, y, dotSize, dotSize, radius);
-        tempCtx.fill();
-      }
-    }
-
-    // Add title
-    tempCtx.fillStyle = "#F0F6FC";
-    tempCtx.font = "bold 28px system-ui, sans-serif";
-    tempCtx.textAlign = "center";
-    tempCtx.fillText(
-      `${text} - GitHub Contribution Art`,
-      tempCanvas.width / 2,
-      50
-    );
-
-    // Download
+    // Download the current canvas as is
     const link = document.createElement("a");
-    link.download = `${text.replace(/[^a-zA-Z0-9]/g, "_")}_github_heatmap.png`;
-    link.href = tempCanvas.toDataURL();
+    link.download = `${displayText.replace(
+      /[^a-zA-Z0-9]/g,
+      "_"
+    )}_github_heatmap.png`;
+    link.href = canvas.toDataURL();
     link.click();
 
     toast.success("Heatmap downloaded successfully!");
